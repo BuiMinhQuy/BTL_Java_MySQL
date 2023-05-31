@@ -1,0 +1,3 @@
+INDEX VERSION 1.131
+file:/D:/UTC2%20_%20University/Code/Java/Learn%20at%20school/BTL/QuanLySinhVien-main/.metadata/.plugins/org.eclipse.jdt.core/1865797976.index
+meta_index

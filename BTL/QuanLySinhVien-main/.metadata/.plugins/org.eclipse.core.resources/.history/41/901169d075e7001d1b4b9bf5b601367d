@@ -1,0 +1,623 @@
+package GUI.Admin;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+
+import javax.swing.DefaultDesktopManager;
+import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+import GUI.FrmLogin;
+import GUI.InitGUI;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.Insets;
+
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import javax.swing.border.LineBorder;
+import java.awt.SystemColor;
+import javax.swing.JButton;
+import javax.swing.UIManager;
+import java.awt.Point;
+
+public class FrmManHinhChinh extends JFrame {
+	private static int SCREEN_HEIGHT;
+	private static int SCREEN_WIDTH;
+
+	private static Connection conn;
+	private static String userName;
+
+	private JPanel pnlMain;
+	private JMenuBar menuBar;
+	private JMenu mnTaiKhoan;
+	private JMenuItem mnItemTaiKhoan;
+	private JMenuItem mnItemDoiMatKhau;
+	private JMenuItem mnItemThoat;
+	private JMenu mnQuanLy;
+	private JMenuItem mnItemQLTaiKhoan;
+	private JMenuItem mnItemQLGiangVien;
+	private JMenuItem mnItemQLSinhVien;
+	private JMenuItem mnItemQLBangDiem;
+	private JMenuItem mnItemQLLop;
+	private JMenuItem mnItemQLChiTietLop;
+	private static JDesktopPane desktopPane;
+
+	private static FrmLogin frmLG;
+	private static FrmManHinhChinh frmMHC;
+	private static FormTK frmTTCN;
+	private static FrmQLTK frmAC;
+	private static FrmTeacher frmGV;
+	private static FrmStudent frmSV;
+	private static FrmTranscript frmTS;
+	private static FrmCourse frmCS;
+	private static FrmCourse_Class frmCSS;
+	private JPanel panelQLTK;
+	private JPanel panelQLGV;
+	private JPanel panelQLSV;
+	private JPanel panelQLBD;
+	private JPanel panelQLHP;
+	private JButton btnQLGV;
+	private JButton btnQLSV;
+	private JButton btnQLBD;
+	private JButton btnQLHP;
+	private JPanel panelQLLHP;
+	private JButton btnQLLHP;
+	private JLabel lblIconQLGV;
+	private JLabel lblIconQLSV;
+	private JLabel lblIconQLBD;
+	private JLabel lblIconQLHP;
+	private JLabel lblIconQLLHP;
+	
+	public void MyFrame() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setLocationRelativeTo(null);
+		setUndecorated(true);
+	}
+
+	public FrmManHinhChinh(FrmLogin frmLG, Connection conn, String userName) {
+		setUndecorated(true);
+		this.frmLG = frmLG;
+		this.frmMHC = frmMHC; // 123
+		this.frmTTCN = null;
+		this.frmGV = null;
+		this.frmSV = null;
+		this.userName = userName;
+		Init();
+		this.conn = conn;
+		setTitle("Màn hình chính - Admin");
+		pnlMain = new JPanel();
+		pnlMain.setLayout(null);
+		pnlMain = (JPanel) getContentPane();
+
+		desktopPane = new JDesktopPane();
+		desktopPane.setBorder(null);
+		// desktopPane.setBorder(null);
+		desktopPane.setBounds(318, 0, 1178, 683);
+		setNonMovableDesktopPane(desktopPane);
+		getContentPane().add(desktopPane);
+
+		menuBar = new JMenuBar();
+		menuBar.setBackground(new Color(255, 255, 255));
+		setJMenuBar(menuBar);
+
+		mnTaiKhoan = new JMenu("Tài Khoản");
+		menuBar.add(mnTaiKhoan);
+
+		mnItemTaiKhoan = new JMenuItem("Tài Khoản Của Tôi");
+		mnItemTaiKhoan.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Load();
+			}
+		});
+		mnTaiKhoan.add(mnItemTaiKhoan);
+
+		mnItemDoiMatKhau = new JMenuItem("Đổi Mật Khẩu");
+		mnItemDoiMatKhau.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				FrmChangePassword frmCP = new FrmChangePassword(frmLG, frmMHC, conn, userName);
+				frmCP.setVisible(true);
+			}
+		});
+		mnTaiKhoan.add(mnItemDoiMatKhau);
+
+		mnItemThoat = new JMenuItem("Thoát");
+		mnItemThoat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int choose = JOptionPane.showConfirmDialog(pnlMain, "Bạn có muốn thoát!", "Thông tin",
+						JOptionPane.OK_CANCEL_OPTION);
+				if (choose == JOptionPane.OK_OPTION) {
+					frmLG.setVisible(true);
+					setVisible(false);
+					dispose();
+				}
+			}
+		});
+		mnTaiKhoan.add(mnItemThoat);
+
+		mnQuanLy = new JMenu("Quản Lý");
+		menuBar.add(mnQuanLy);
+
+		mnItemQLTaiKhoan = new JMenuItem("Quản Lý Tài Khoản");
+		mnItemQLTaiKhoan.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmAC == null || frmAC.isClosed()) {
+					frmAC = new FrmAccount(conn);
+					desktopPane.add(frmAC);
+					frmAC.setVisible(true);
+				}
+				frmAC.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmAC.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLTaiKhoan);
+
+		mnItemQLGiangVien = new JMenuItem("Quản Lý Giảng Viên");
+		mnItemQLGiangVien.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmGV == null || frmGV.isClosed()) {
+					frmGV = new FrmTeacher(conn);
+					desktopPane.add(frmGV);
+					frmGV.setVisible(true);
+				}
+				frmGV.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmGV.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLGiangVien);
+
+		mnItemQLSinhVien = new JMenuItem("Quản Lý Sinh Viên");
+		mnItemQLSinhVien.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmSV == null || frmSV.isClosed()) {
+					frmSV = new FrmStudent(conn);
+					desktopPane.add(frmSV);
+					frmSV.setVisible(true);
+				}
+				frmSV.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmSV.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLSinhVien);
+
+		mnItemQLBangDiem = new JMenuItem("Quản Lý Bảng Điểm");
+		mnItemQLBangDiem.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmTS == null || frmTS.isClosed()) {
+					frmTS = new FrmTranscript(conn);
+					desktopPane.add(frmTS);
+					frmTS.setVisible(true);
+				}
+				frmTS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmTS.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLBangDiem);
+
+		mnItemQLLop = new JMenuItem("Quản Lý Học Phần");
+		mnItemQLLop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmCS == null || frmCS.isClosed()) {
+					frmCS = new FrmCourse(conn);
+					desktopPane.add(frmCS);
+					frmCS.setVisible(true);
+				}
+				frmCS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmCS.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLLop);
+
+		mnItemQLChiTietLop = new JMenuItem("Quản Lý Lớp Học Phần");
+		mnItemQLChiTietLop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmCSS == null || frmCSS.isClosed()) {
+					frmCSS = new FrmCourse_Class(conn);
+					desktopPane.add(frmCSS);
+					frmCSS.setVisible(true);
+				}
+				frmCSS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmCSS.setResizable(false);
+			}
+		});
+		mnQuanLy.add(mnItemQLChiTietLop);
+
+		// Frame Size
+		setSize(1492, 707);
+		// setBounds(0, 0, FRM_WIDTH, FRM_HEIGHT);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		// setUndecorated(true);
+		setResizable(true);
+		setLocationRelativeTo(null);
+		getContentPane().setLayout(null);
+
+		JPanel Menupanel = new JPanel();
+		Menupanel.setBackground(new Color(0, 0, 255));
+		Menupanel.setBorder(null);
+		Menupanel.setBounds(0, 0, 319, 691);
+		getContentPane().add(Menupanel);
+		Menupanel.setLayout(null);
+		ImageIcon logo_login_mhc = new ImageIcon(FrmManHinhChinh.class.getResource("/res/uct2.png"));
+		Image LgLogin = logo_login_mhc.getImage();
+		Image newLgLogin = LgLogin.getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+		logo_login_mhc = new ImageIcon(newLgLogin);
+
+		panelQLTK = new JPanel();
+		panelQLTK.setBackground(new Color(255, 255, 153));
+		panelQLTK.setBounds(0, 327, 319, 60);
+		Menupanel.add(panelQLTK);
+		panelQLTK.setLayout(null);
+
+		JButton btnQLTK = new JButton("Quản Lý Tài Khoản");
+		btnQLTK.setBorder(null);
+		btnQLTK.setHorizontalTextPosition(SwingConstants.CENTER);
+		btnQLTK.setRequestFocusEnabled(false);
+		btnQLTK.setBackground(new Color(255, 255, 255));
+		btnQLTK.setBounds(0, 0, 319, 60);
+		panelQLTK.add(btnQLTK);
+		btnQLTK.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmAC == null || frmAC.isClosed()) {
+					frmAC = new FrmAccount(conn);
+					desktopPane.add(frmAC);
+					frmAC.setVisible(true);
+				}
+				frmAC.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmAC.setResizable(false);
+
+			}
+		});
+		btnQLTK.setFont(new Font("Arial", Font.BOLD, 16));
+//		ImageIcon iconQLTK = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconperson.png"));
+//		Image icQLTK = iconQLTK.getImage();
+//		Image newiconQLTK = icQLTK.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+//		iconQLTK = new ImageIcon(newiconQLTK);
+//		btnQLTK.setIcon(iconQLTK);
+		btnQLTK.setContentAreaFilled(false);
+		
+		JLabel lblIconQLTK = new JLabel("");
+		lblIconQLTK.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLTK.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLTK = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconperson.png"));
+		Image icQLTK = iconQLTK.getImage();
+		Image newiconQLTK = icQLTK.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+		iconQLTK = new ImageIcon(newiconQLTK);
+		lblIconQLTK.setIcon(iconQLTK);
+		panelQLTK.add(lblIconQLTK);
+
+		panelQLGV = new JPanel();
+		panelQLGV.setBackground(new Color(255, 255, 153));
+		panelQLGV.setBounds(0, 386, 319, 61);
+		Menupanel.add(panelQLGV);
+		panelQLGV.setLayout(null);
+
+		btnQLGV = new JButton("Quản Lý Giảng Viên");
+		btnQLGV.setBorder(null);
+		btnQLGV.setRequestFocusEnabled(false);
+		btnQLGV.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmGV == null || frmGV.isClosed()) {
+					frmGV = new FrmTeacher(conn);
+					desktopPane.add(frmGV);
+					frmGV.setVisible(true);
+				}
+				frmGV.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmGV.setResizable(false);
+			}
+		});
+		btnQLGV.setFont(new Font("Arial", Font.BOLD, 16));
+		btnQLGV.setBounds(0, 0, 319, 60);
+//		ImageIcon iconQLGV = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconteacher.png"));
+//		Image icQLGV = iconQLGV.getImage();
+//		Image newiconQLGV = icQLGV.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+//		iconQLGV = new ImageIcon(newiconQLGV);
+//		btnQLGV.setIcon(iconQLGV);
+		panelQLGV.add(btnQLGV);
+		btnQLGV.setContentAreaFilled(false);
+		
+		lblIconQLGV = new JLabel("");
+		lblIconQLGV.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLGV.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLGV = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconteacher.png"));
+		Image icQLGV = iconQLGV.getImage();
+		Image newiconQLGV = icQLGV.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+		iconQLGV = new ImageIcon(newiconQLGV);
+		lblIconQLGV.setIcon(iconQLGV);
+		panelQLGV.add(lblIconQLGV);
+
+		panelQLSV = new JPanel();
+		panelQLSV.setBackground(new Color(255, 255, 153));
+		panelQLSV.setBounds(0, 446, 319, 61);
+		Menupanel.add(panelQLSV);
+		panelQLSV.setLayout(null);
+
+		btnQLSV = new JButton("Quản Lý Sinh Viên");
+		btnQLSV.setBorder(null);
+		btnQLSV.setRequestFocusEnabled(false);
+		btnQLSV.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmSV == null || frmSV.isClosed()) {
+					frmSV = new FrmStudent(conn);
+					desktopPane.add(frmSV);
+					frmSV.setVisible(true);
+				}
+				frmSV.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmSV.setResizable(false);
+			}
+		});
+		btnQLSV.setFont(new Font("Arial", Font.BOLD, 16));
+		btnQLSV.setBounds(0, 0, 319, 59);
+//		ImageIcon iconQLSV = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconstudent.png"));
+//		Image icQLSV = iconQLSV.getImage();
+//		Image newiconQLSV = icQLSV.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+//		iconQLSV = new ImageIcon(newiconQLSV);
+//		btnQLSV.setIcon(iconQLSV);
+		panelQLSV.add(btnQLSV);
+		btnQLSV.setContentAreaFilled(false);
+		
+		lblIconQLSV = new JLabel("");
+		lblIconQLSV.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLSV.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLSV = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconstudent.png"));
+		Image icQLSV = iconQLSV.getImage();
+		Image newiconQLSV = icQLSV.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+		iconQLSV = new ImageIcon(newiconQLSV);
+		lblIconQLSV.setIcon(iconQLSV);
+		panelQLSV.add(lblIconQLSV);
+
+		panelQLBD = new JPanel();
+		panelQLBD.setBackground(new Color(255, 255, 153));
+		panelQLBD.setBounds(0, 505, 319, 60);
+		Menupanel.add(panelQLBD);
+		panelQLBD.setLayout(null);
+
+		btnQLBD = new JButton("Quản Lý Bảng Điểm");
+		btnQLBD.setBorder(null);
+		btnQLBD.setRequestFocusEnabled(false);
+		btnQLBD.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmTS == null || frmTS.isClosed()) {
+					frmTS = new FrmTranscript(conn);
+					desktopPane.add(frmTS);
+					frmTS.setVisible(true);
+				}
+				frmTS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmTS.setResizable(false);
+			}
+		});
+		btnQLBD.setFont(new Font("Arial", Font.BOLD, 16));
+		btnQLBD.setBounds(0, 2, 319, 57);
+//		ImageIcon iconQLBD = new ImageIcon(FrmManHinhChinh.class.getResource("/res/icontranscript.png"));
+//		Image icQLBD = iconQLBD.getImage();
+//		Image newiconQLBD = icQLBD.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+//		iconQLBD = new ImageIcon(newiconQLBD);
+//		btnQLBD.setIcon(iconQLBD);
+		panelQLBD.add(btnQLBD);
+		btnQLBD.setContentAreaFilled(false);
+		
+		lblIconQLBD = new JLabel("");
+		lblIconQLBD.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLBD.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLBD = new ImageIcon(FrmManHinhChinh.class.getResource("/res/icontranscript.png"));
+		Image icQLBD = iconQLBD.getImage();
+		Image newiconQLBD = icQLBD.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+		iconQLBD = new ImageIcon(newiconQLBD);
+		lblIconQLBD.setIcon(iconQLBD);
+		panelQLBD.add(lblIconQLBD);
+
+		panelQLHP = new JPanel();
+		panelQLHP.setBackground(new Color(255, 255, 153));
+		panelQLHP.setBounds(0, 564, 319, 60);
+		Menupanel.add(panelQLHP);
+		panelQLHP.setLayout(null);
+
+		btnQLHP = new JButton("Quản Lý Học Phần");
+		btnQLHP.setBorder(null);
+		btnQLHP.setRequestFocusEnabled(false);
+		btnQLHP.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmCS == null || frmCS.isClosed()) {
+					frmCS = new FrmCourse(conn);
+					desktopPane.add(frmCS);
+					frmCS.setVisible(true);
+				}
+				frmCS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmCS.setResizable(false);
+			}
+		});
+		btnQLHP.setFont(new Font("Arial", Font.BOLD, 16));
+		btnQLHP.setBounds(0, 0, 319, 60);
+//		ImageIcon iconQLHP = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconterm.png"));
+//		Image icQLHP = iconQLHP.getImage();
+//		Image newiconQLHP = icQLHP.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+//		iconQLHP = new ImageIcon(newiconQLHP);
+//		btnQLHP.setIcon(iconQLHP);
+		panelQLHP.add(btnQLHP);
+		btnQLHP.setContentAreaFilled(false);
+		
+		lblIconQLHP = new JLabel("");
+		lblIconQLHP.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLHP.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLHP = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconterm.png"));
+		Image icQLHP = iconQLHP.getImage();
+		Image newiconQLHP = icQLHP.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+		iconQLHP = new ImageIcon(newiconQLHP);
+		lblIconQLHP.setIcon(iconQLHP);
+		panelQLHP.add(lblIconQLHP);
+
+		panelQLLHP = new JPanel();
+		panelQLLHP.setLayout(null);
+		panelQLLHP.setBackground(new Color(255, 255, 153));
+		panelQLLHP.setBounds(0, 624, 319, 60);
+		Menupanel.add(panelQLLHP);
+
+		btnQLLHP = new JButton("Quản Lý Lớp Học Phần");
+		btnQLLHP.setBorder(null);
+		btnQLLHP.setRequestFocusEnabled(false);
+		btnQLLHP.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+					frmChild.dispose();
+				}
+				if (frmCSS == null || frmCSS.isClosed()) {
+					frmCSS = new FrmCourse_Class(conn);
+					desktopPane.add(frmCSS);
+					frmCSS.setVisible(true);
+				}
+				frmCSS.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+				frmCSS.setResizable(false);
+			}
+		});
+		btnQLLHP.setFont(new Font("Arial", Font.BOLD, 16));
+		btnQLLHP.setBounds(0, 0, 319, 60);
+//		ImageIcon iconQLLHP = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconsectionclass.png"));
+//		Image icQLLHP = iconQLLHP.getImage();
+//		Image newiconQLLHP = icQLLHP.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+//		iconQLLHP = new ImageIcon(newiconQLLHP);
+//		btnQLLHP.setIcon(iconQLLHP);
+		panelQLLHP.add(btnQLLHP);
+		btnQLLHP.setContentAreaFilled(false);
+		
+		lblIconQLLHP = new JLabel("");
+		lblIconQLLHP.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIconQLLHP.setBounds(0, 0, 66, 60);
+		ImageIcon iconQLLHP = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconsectionclass.png"));
+		Image icQLLHP = iconQLLHP.getImage();
+		Image newiconQLLHP = icQLLHP.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+		iconQLLHP = new ImageIcon(newiconQLLHP);
+		lblIconQLLHP.setIcon(iconQLLHP);
+		panelQLLHP.add(lblIconQLLHP);
+
+		JLabel lblIcon = new JLabel("");
+		lblIcon.setBounds(0, 0, 319, 284);
+		Menupanel.add(lblIcon);
+		lblIcon.setHorizontalAlignment(SwingConstants.CENTER);
+		lblIcon.setIcon(logo_login_mhc);
+		Load();
+	}
+
+	public void Load() {
+		frmLG = null;
+		frmMHC = null;
+		frmTTCN = null;
+		frmAC = null;
+		frmGV = null;
+		frmSV = null;
+		frmTS = null;
+		frmCS = null;
+		frmCSS = null;
+		for (JInternalFrame frmChild : desktopPane.getAllFrames()) {
+			frmChild.dispose();
+		}
+		if (frmTTCN == null || frmTTCN.isClosed()) {
+			frmTTCN = new FrmPersonalInformation(conn, userName);
+			desktopPane.add(frmTTCN);
+		}
+		frmTTCN.setBounds(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		frmTTCN.setResizable(false);
+		frmTTCN.setVisible(true);
+	}
+
+	public void Init() {
+		InitGUI init = new InitGUI();
+		SCREEN_HEIGHT = init.getSCREEN_HEIGHT();
+		SCREEN_WIDTH = init.getSCREEN_WIDTH();
+	}
+
+	public void setNonMovableDesktopPane(JDesktopPane pPane) {
+		JDesktopPane mNonMovableDesktopPane;
+		mNonMovableDesktopPane = pPane;
+		try {
+			NonMovableDesktopManager d = (NonMovableDesktopManager) mNonMovableDesktopPane.getDesktopManager();
+		} catch (ClassCastException cce) {
+			mNonMovableDesktopPane.setDesktopManager(new NonMovableDesktopManager());
+		}
+	}
+
+	private class NonMovableDesktopManager extends DefaultDesktopManager {
+		/**
+		 * Moves the visible location of the frame being dragged to the location
+		 * specified. The means by which this occurs can vary depending on the dragging
+		 * algorithm being used. The actual logical location of the frame might not
+		 * change until <code>endDraggingFrame</code> is called.
+		 */
+		public void dragFrame(JComponent f, int newX, int newY) {
+		}
+
+		// implements javax.swing.DesktopManager
+		public void beginDraggingFrame(JComponent f) {
+		}
+
+		// implements javax.swing.DesktopManager
+		public void endDraggingFrame(JComponent f) {
+		}
+	}
+	private class PanelButtonMouseAdapter extends MouseAdapter {
+		JPanel panel;
+
+		public PanelButtonMouseAdapter(JPanel panel) {
+			this.panel = panel;
+		}
+		// @override
+		public void mouseEntered(MouseEvent e) {
+			panel.setBackground(new Color(171, 171, 171));
+		}
+		// @override
+		public void mouseExited(MouseEvent e) {
+			panel.setBackground(new Color(255, 255, 153));
+		}
+		// @override
+		public void mousePressed(MouseEvent e) {
+			panel.setBackground(new Color(171, 171, 171));
+		}
+		// @override
+		public void mouseReleased(MouseEvent e) {
+			panel.setBackground(new Color(171, 171, 171));
+		}
+	}
+}

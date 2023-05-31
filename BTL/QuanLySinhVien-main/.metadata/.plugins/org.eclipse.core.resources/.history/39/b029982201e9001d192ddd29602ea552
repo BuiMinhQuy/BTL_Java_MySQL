@@ -1,0 +1,511 @@
+package GUI.Admin;
+
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.HeadlessException;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import javax.swing.table.DefaultTableModel;
+
+import com.toedter.calendar.JDateChooser;
+
+import GUI.InitGUI;
+import Model.Account;
+import Model.Faculty;
+import Model.Course;
+import javax.swing.SwingConstants;
+import java.awt.Color;
+import javax.swing.border.EtchedBorder;
+
+public class FrmCourse extends JInternalFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private static Connection conn = null;
+
+	private String FONT_TYPE;
+	private int FONT;
+	private int FONT_SIZE;
+	private int COMPONENTS_HEIGHT;
+	private int BUTTON_HEIGHT;
+	private int BUTTON_WIDTH;
+	private int SCREEN_HEIGHT;
+	private int SCREEN_WIDTH;
+
+	private static JTextField txtID;
+	private static JTextField txtName;
+	private static JTextField txtDescription;
+	private static JComboBox cbbNumberOfCredits;
+	private static DefaultComboBoxModel cbbNumberOfCreditsModel;
+	private static ArrayList<Course> lisCourse = new ArrayList<Course>();
+	private static String[] columnName = {"Mã Lớp", "Tên Khóa Học", "Mô Tả", "Số Tín Chỉ"};
+	private static DefaultTableModel model = new DefaultTableModel(columnName,0);
+	private static JTable tabCourse = new JTable(model) ;
+	private static JButton btnCancel = new JButton("Hủy");
+	private static JButton btnSave = new JButton("Lưu");
+	private static JButton btnDelete = new JButton("Xóa");
+	private static JButton btnFind = new JButton("Tìm");
+	private static JButton btnCreate = new JButton("Thêm");
+	private static JButton btnEdit = new JButton("Sửa");
+	private static int flag = 0;
+	private final JLabel lblQLHP = new JLabel("QUẢN LÝ HỌC PHẦN");
+	private final JLabel lblTTHP = new JLabel("Thông Tin Học Phần");
+
+	public void Init() {
+		InitGUI init = new InitGUI();
+		this.FONT_TYPE = init.getFONT_TYPE();
+		this.FONT = init.getFONT();
+		this.FONT_SIZE = init.getFONT_SIZE();
+		this.COMPONENTS_HEIGHT = init.getCOMPONENTS_HEIGHT();
+		this.BUTTON_HEIGHT = init.getBUTTON_HEIGHT();
+		this.BUTTON_WIDTH = init.getBUTTON_WIDTH();
+		this.SCREEN_WIDTH = init.getSCREEN_WIDTH();
+		this.SCREEN_HEIGHT=init.getSCREEN_HEIGHT();
+	}
+
+	public FrmCourse(Connection conn) {
+		setBorder(null);
+		((javax.swing.plaf.basic.BasicInternalFrameUI)this.getUI()).setNorthPane(null);
+		FrmCourse.conn = conn;
+		Init();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1178, 710);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		setContentPane(contentPane);
+
+		contentPane.setLayout(null);
+		tabCourse.setFont(new Font("Arial", Font.PLAIN, 14));
+
+		tabCourse.setBounds(10, 168, 870, 305);
+		tabCourse.setRowHeight(30);
+		tabCourse.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				int row = tabCourse.getSelectedRow();
+				if(row != -1) {
+					txtID.setText(tabCourse.getValueAt(row, 0).toString());
+					txtName.setText(tabCourse.getValueAt(row, 1).toString());
+					txtDescription.setText(tabCourse.getValueAt(row, 2).toString());
+					int numberOfCredits = Integer.valueOf(tabCourse.getValueAt(row, 3).toString());
+					cbbNumberOfCredits.setSelectedIndex(numberOfCredits - 1);
+				}
+			}
+
+		});
+		JScrollPane scrollPane = new JScrollPane(tabCourse);
+		scrollPane.setBounds(4, 50, 819, 630);
+		contentPane.add(scrollPane);
+
+		JLabel lblNewLabel = new JLabel("Mã Lớp :");
+		lblNewLabel.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		lblNewLabel.setBounds(831, 47, 102, 38);
+		contentPane.add(lblNewLabel);
+
+		JLabel lblTnGingVin = new JLabel("Tên Khóa Học :");
+		lblTnGingVin.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		lblTnGingVin.setBounds(831, 107, 122, 38);
+		contentPane.add(lblTnGingVin);
+
+		JLabel lblEmail = new JLabel("Mô Tả :");
+		lblEmail.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		lblEmail.setBounds(831, 223, 122, 38);
+		contentPane.add(lblEmail);
+
+		JLabel lblSinThoi = new JLabel("Số Tín Chỉ :");
+		lblSinThoi.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		lblSinThoi.setBounds(831, 169, 101, 38);
+		contentPane.add(lblSinThoi);
+
+		txtID = new JTextField();
+		txtID.setFont(new Font("Arial", Font.PLAIN, 14));
+		txtID.setBounds(943, 57, 227, 27);
+		contentPane.add(txtID);
+		txtID.setColumns(10);
+
+		txtName = new JTextField();
+		txtName.setFont(new Font("Arial", Font.PLAIN, 14));
+		txtName.setColumns(10);
+		txtName.setBounds(945, 116, 225, 27);
+		contentPane.add(txtName);
+		
+		txtDescription = new JTextField();
+		txtDescription.setFont(new Font("Arial", Font.PLAIN, 14));
+		txtDescription.setColumns(10);
+		txtDescription.setBounds(943, 232, 227, 27);
+		contentPane.add(txtDescription);
+
+		ArrayList<NumberOfCredits> numberOfCredits = new ArrayList<NumberOfCredits>();
+		numberOfCredits.add(new NumberOfCredits(1, "1"));
+		numberOfCredits.add(new NumberOfCredits(2, "2"));
+		numberOfCredits.add(new NumberOfCredits(3, "3"));
+		cbbNumberOfCreditsModel = new DefaultComboBoxModel();
+		for(NumberOfCredits noc : numberOfCredits) {
+			cbbNumberOfCreditsModel.addElement(noc);
+		}
+
+		cbbNumberOfCredits = new JComboBox();
+		cbbNumberOfCredits.setBackground(Color.WHITE);
+		cbbNumberOfCredits.setModel(cbbNumberOfCreditsModel);
+		cbbNumberOfCredits.setFont(new Font("Arial", Font.PLAIN, 14));
+		cbbNumberOfCredits.setBounds(943, 175, 227, 27);
+		cbbNumberOfCredits.setRenderer(new GenderRenderer());
+		contentPane.add(cbbNumberOfCredits);
+		btnCancel.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnCancel.setBackground(Color.WHITE);
+		btnCancel.setFocusPainted(false);
+
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnFind.setEnabled(true);
+				btnCreate.setEnabled(true);
+				btnEdit.setEnabled(true);
+				btnCancel.setEnabled(false);
+				btnSave.setEnabled(false);
+				btnDelete.setEnabled(true);
+				txtID.setEnabled(true);
+				load();
+			}
+		});
+		btnCancel.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnCancel.setBounds(1019, 625, BUTTON_WIDTH, BUTTON_HEIGHT);
+		//btnCancel.setIcon(new ImageIcon("resources/cancel.png"));
+		ImageIcon iconcancel = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconclose.png"));
+		Image iccancel = iconcancel.getImage();
+		Image newiconcancel = iccancel.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		iconcancel = new ImageIcon(newiconcancel);
+		btnCancel.setIcon(iconcancel);
+		contentPane.add(btnCancel);
+		btnSave.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnSave.setBackground(Color.WHITE);
+		btnSave.setFocusPainted(false);
+
+		btnSave.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(flag == 0)
+					Add();
+				else if(flag == 1)
+					Edit();
+
+				btnFind.setEnabled(true);
+				btnCreate.setEnabled(true);
+				btnEdit.setEnabled(true);
+				btnCancel.setEnabled(false);
+				btnSave.setEnabled(false);
+				btnDelete.setEnabled(true);
+			}
+		});
+		btnSave.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnSave.setBounds(1019, 563, BUTTON_WIDTH, BUTTON_HEIGHT);
+		//btnSave.setIcon(new ImageIcon("resources/save.jpg"));
+		ImageIcon iconsave = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconsave.png"));
+		Image icsave = iconsave.getImage();
+		Image newiconsave = icsave.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		iconsave = new ImageIcon(newiconsave);
+		btnSave.setIcon(iconsave);
+		contentPane.add(btnSave);
+		btnDelete.setBackground(Color.WHITE);
+		btnDelete.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnDelete.setFocusPainted(false);
+
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Del();
+			}
+		});
+		btnDelete.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnDelete.setBounds(857, 625, BUTTON_WIDTH, BUTTON_HEIGHT);
+		//btnDelete.setIcon(new ImageIcon("resources/delete.png"));
+		ImageIcon icondelete = new ImageIcon(FrmManHinhChinh.class.getResource("/res/icondelete.png"));
+		Image icdelete = icondelete.getImage();
+		Image newicondelete = icdelete.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		icondelete = new ImageIcon(newicondelete);
+		btnDelete.setIcon(icondelete);
+		contentPane.add(btnDelete);
+		btnEdit.setBackground(Color.WHITE);
+		btnEdit.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnEdit.setFocusPainted(false);
+
+		btnEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				flag = 1; 
+				txtID.setEnabled(false);
+				btnFind.setEnabled(false);
+				btnEdit.setEnabled(false);
+				btnDelete.setEnabled(false);
+				btnCancel.setEnabled(true);
+				btnSave.setEnabled(true);
+				btnCreate.setEnabled(false);
+			}
+		});
+		btnEdit.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnEdit.setBounds(857, 563, BUTTON_WIDTH, BUTTON_HEIGHT);
+		//btnEdit.setIcon(new ImageIcon("resources/edit.png"));
+		ImageIcon iconedit = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconfix.png"));
+		Image icedit = iconedit.getImage();
+		Image newiconedit = icedit.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		iconedit = new ImageIcon(newiconedit);
+		btnEdit.setIcon(iconedit);
+		contentPane.add(btnEdit);
+		btnCreate.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnCreate.setBackground(Color.WHITE);
+		btnCreate.setFocusPainted(false);
+
+		btnCreate.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				flag = 0;
+				btnFind.setEnabled(false);
+				btnEdit.setEnabled(false);
+				btnDelete.setEnabled(false);
+				btnCancel.setEnabled(true);
+				btnSave.setEnabled(true);
+				btnCreate.setEnabled(false);
+				clear();
+			}
+		});
+		btnCreate.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnCreate.setBounds(1019, 498, BUTTON_WIDTH, BUTTON_HEIGHT);
+		//btnCreate.setIcon(new ImageIcon("resources/create.png"));
+		ImageIcon iconcreate = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconadd.png"));
+		Image iccreate = iconcreate.getImage();
+		Image newiconcreate = iccreate.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		iconcreate = new ImageIcon(newiconcreate);
+		btnCreate.setIcon(iconcreate);
+		contentPane.add(btnCreate);
+		btnFind.setBorder(new EtchedBorder(EtchedBorder.LOWERED, null, null));
+		btnFind.setBackground(Color.WHITE);
+		btnFind.setFocusPainted(false);
+
+		btnFind.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				btnCancel.setEnabled(true);
+				Find();
+			}
+		});
+
+		btnFind.setFont(new Font(FONT_TYPE, FONT, FONT_SIZE));
+		btnFind.setBounds(857, 498, BUTTON_WIDTH, BUTTON_HEIGHT);
+		ImageIcon iconfind = new ImageIcon(FrmManHinhChinh.class.getResource("/res/iconsearch.png"));
+		Image icfind = iconfind.getImage();
+		Image newiconfind = icfind.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
+		iconfind = new ImageIcon(newiconfind);
+		btnFind.setIcon(iconfind);
+		contentPane.add(btnFind);
+		
+		lblQLHP.setHorizontalAlignment(SwingConstants.CENTER);
+		lblQLHP.setFont(new Font("Arial", Font.BOLD, 28));
+		lblQLHP.setBounds(0, 0, 819, 47);
+		
+		contentPane.add(lblQLHP);
+		lblTTHP.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTTHP.setFont(new Font("Arial", Font.BOLD, 18));
+		lblTTHP.setBounds(819, 0, 359, 47);
+		
+		contentPane.add(lblTTHP);
+		
+		load();
+	}
+	public static void load() {
+		txtID.setEnabled(true);
+		ArrayList<Course> lisCourse = new ArrayList<Course>();
+		try {
+			lisCourse = Course.load(conn);
+		} catch(ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		DefaultTableModel model = (DefaultTableModel)tabCourse.getModel();
+		if(model.getRowCount() > 0) {
+			model.setRowCount(0);
+		}
+		Object[] rows = new Object[4];
+		btnSave.setEnabled(false);
+		btnCancel.setEnabled(false);
+		for(int i=0; i <lisCourse.size();i++ )
+		{    
+			rows[0]=(lisCourse.get(i).getCid()); 
+			rows[1]=(lisCourse.get(i).getName()); 
+			rows[2]=(lisCourse.get(i).getDescription());
+			rows[3]=(lisCourse.get(i).getNumOfCredits());
+
+			model.addRow(rows); 
+		}
+	}
+	public static void Add() {
+		Course cs = new Course();
+		cs.setCid(txtID.getText().toString());
+		cs.setName(txtName.getText().toString());
+		cs.setDescription(txtDescription.getText().toString());
+		cs.setNumOfCredits(((NumberOfCredits)cbbNumberOfCredits.getSelectedItem()).getType());
+		try {
+			if(Course.Insert(cs, conn) == 1) {
+				JOptionPane.showMessageDialog(tabCourse, "Thêm Thành Công",  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+				lisCourse.add(cs);
+				DefaultTableModel model = (DefaultTableModel)tabCourse.getModel();
+				model.setRowCount(0);
+				load();
+			}
+			else
+				JOptionPane.showMessageDialog(tabCourse, "Thêm thất bại",  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+
+		} catch (ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	public static void Edit() {
+		Course cs = new Course();
+		cs.setCid(txtID.getText().toString());
+		cs.setName(txtName.getText().toString());
+		cs.setDescription(txtDescription.getText().toString());
+		cs.setNumOfCredits(((NumberOfCredits)cbbNumberOfCredits.getSelectedItem()).getType());
+		try {
+			if(Course.Edit(cs, conn) == 1) {
+				JOptionPane.showMessageDialog(tabCourse, "Sửa Thành Công",  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+				for(int i=0; i< lisCourse.size();i++){
+					if(lisCourse.get(i).getCid() == cs.getCid()) {
+						lisCourse.get(i).setName(cs.getName());
+						lisCourse.get(i).setDescription(cs.getDescription());
+						lisCourse.get(i).setNumOfCredits(cs.getNumOfCredits());
+						break;
+					}
+
+				}
+				DefaultTableModel model = (DefaultTableModel)tabCourse.getModel();
+				model.setRowCount(0);
+				load();	
+			}
+			else
+				JOptionPane.showMessageDialog(tabCourse, "Sửa thất bại",  "Thông Báo", JOptionPane.INFORMATION_MESSAGE);
+
+
+		} catch (ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+	}
+	@SuppressWarnings("unlikely-arg-type")
+	public static void Del() {
+		String index=txtID.getText().toString();
+		try {
+			if(Course.Del(index, conn)==1)
+			{
+				lisCourse.remove(index);
+				JOptionPane.showMessageDialog( tabCourse, "Xoa thanh cong!",  "Thong Bao", JOptionPane.INFORMATION_MESSAGE);
+				DefaultTableModel model = (DefaultTableModel)tabCourse.getModel();
+				model.setRowCount(0);
+				load();
+			}
+			else
+				JOptionPane.showMessageDialog( tabCourse, "Xay ra loi",  "Thong Bao", JOptionPane.INFORMATION_MESSAGE);
+		} catch (ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+	}
+	public static void Find() {
+		ArrayList<Course> lisCourse = new ArrayList<Course>();
+		try {
+			lisCourse = Course.load(conn);
+		} catch (ClassNotFoundException | SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		DefaultTableModel model = (DefaultTableModel)tabCourse.getModel();
+		Object[] rows = new Object[4]; 
+		String index = txtID.getText();
+		System.out.print(1);
+		try {
+			Course cs = Course.findCourse(index, conn);
+			if(cs != null) {
+				model.setRowCount(0);
+				rows[0]=cs.getCid(); 
+				rows[1]=cs.getName(); 
+				rows[2]=cs.getDescription();
+				rows[3]=cs.getNumOfCredits();
+
+				model.addRow(rows); 
+			}
+			else {
+				JOptionPane.showConfirmDialog(tabCourse, "Không Tìm Thấy!!","Thông Báo",JOptionPane.OK_OPTION);
+
+			}
+		} catch (NumberFormatException | HeadlessException | ClassNotFoundException | SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public static void clear() {
+		txtID.setText("");
+		txtName.setText("");
+		txtDescription.setText("");
+		cbbNumberOfCredits.setSelectedIndex(-1);
+	}
+	class NumberOfCredits{
+		private int type;
+		private String name;
+		public NumberOfCredits(int type, String name) {
+			this.type = type;
+			this.name = name;
+		}
+		public int getType() {
+			return type;
+		}
+		public void setType(int type) {
+			this.type = type;
+		}
+		public String getName() {
+			return name;
+		}
+		public void setName(String name) {
+			this.name = name;
+		}
+	}
+	class GenderRenderer extends BasicComboBoxRenderer
+	{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			if(value instanceof NumberOfCredits){
+				NumberOfCredits val = (NumberOfCredits) value;
+				setText(val.getName());
+			}
+			return this;
+		}
+	}
+}

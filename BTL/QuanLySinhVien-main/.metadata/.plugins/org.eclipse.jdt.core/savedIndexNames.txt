@@ -1,0 +1,7 @@
+INDEX VERSION 1.131+D:\UTC2 _ University\Code\Java\Learn at school\BTL\QuanLySinhVien-main\.metadata\.plugins\org.eclipse.jdt.core
+1865797976.index
+3950951136.index
+761821293.index
+2259633660.index
+2175168837.index
+114629807.index
